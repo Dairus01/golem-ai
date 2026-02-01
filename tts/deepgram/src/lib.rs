@@ -25,7 +25,13 @@ impl DeepgramComponent {
             let api_key = std::env::var("DEEPGRAM_API_KEY")
                 .map_err(|err| golem_tts::error::Error::EnvVariablesNotSet(format!("Failed to load DEEPGRAM_API_KEY: {err}")))?;
             let api_version = std::env::var("DEEPGRAM_API_VERSION").ok();
-            Ok(DeepgramTtsApi::new(api_key, api_version, WstdHttpClient::new()))
+            let http_client = if let Ok(endpoint) = std::env::var("TTS_PROVIDER_ENDPOINT") {
+                WstdHttpClient::new_with_endpoint(&endpoint)
+                    .map_err(|err| golem_tts::error::Error::HttpError(err.to_string()))?
+            } else {
+                WstdHttpClient::new()
+            };
+            Ok(DeepgramTtsApi::new(api_key, api_version, http_client))
         })
     }
 }

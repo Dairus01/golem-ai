@@ -32,7 +32,19 @@ impl PollyComponent {
             let secret_key = std::env::var("AWS_SECRET_ACCESS_KEY")
                 .map_err(|err| golem_tts::error::Error::EnvVariablesNotSet(format!("Failed to load AWS_SECRET_ACCESS_KEY: {err}")))?;
             let session_token = std::env::var("AWS_SESSION_TOKEN").ok();
-            Ok(PollyApi::new(access_key, secret_key, session_token, region, WstdHttpClient::new()))
+            let http_client = if let Ok(endpoint) = std::env::var("TTS_PROVIDER_ENDPOINT") {
+                WstdHttpClient::new_with_endpoint(&endpoint)
+                    .map_err(|err| golem_tts::error::Error::HttpError(err.to_string()))?
+            } else {
+                WstdHttpClient::new()
+            };
+            Ok(PollyApi::new(
+                access_key,
+                secret_key,
+                session_token,
+                region,
+                http_client,
+            ))
         })
     }
 }

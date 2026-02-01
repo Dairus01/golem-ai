@@ -28,7 +28,13 @@ impl ElevenLabsComponent {
                 ))
             })?;
             let model_version = std::env::var("ELEVENLABS_MODEL_VERSION").ok();
-            Ok(ElevenLabsApi::new(api_key, model_version, WstdHttpClient::new()))
+            let http_client = if let Ok(endpoint) = std::env::var("TTS_PROVIDER_ENDPOINT") {
+                WstdHttpClient::new_with_endpoint(&endpoint)
+                    .map_err(|err| golem_tts::error::Error::HttpError(err.to_string()))?
+            } else {
+                WstdHttpClient::new()
+            };
+            Ok(ElevenLabsApi::new(api_key, model_version, http_client))
         })
     }
 }

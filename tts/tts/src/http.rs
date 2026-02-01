@@ -55,6 +55,14 @@ impl Clone for WstdHttpClient {
 
 impl WstdHttpClient {
     pub fn new() -> Self {
+        let timeout = std::env::var("TTS_PROVIDER_TIMEOUT")
+            .ok()
+            .and_then(|value| value.parse::<u64>().ok())
+            .unwrap_or(30);
+        let timeout = Duration::from_secs(timeout);
+        let mut client = Client::new();
+        client.set_connect_timeout(timeout);
+        client.set_first_byte_timeout(timeout);
         let max_retries = std::env::var("TTS_PROVIDER_MAX_RETRIES")
             .ok()
             .and_then(|n| n.parse::<usize>().ok())
@@ -66,7 +74,7 @@ impl WstdHttpClient {
             .with_max_delay(Duration::from_secs(10));
 
         Self {
-            client: Client::new(),
+            client,
             retry: Retry::new(retry_config, WasiAsyncRuntime::new()),
         }
     }
@@ -90,6 +98,35 @@ impl WstdHttpClient {
             client,
             retry: Retry::new(retry_config, WasiAsyncRuntime::new()),
         }
+    }
+
+    pub fn new_with_endpoint(
+        base_url: &str,
+    ) -> Result<Self, http::Error> {
+        let timeout = std::env::var("TTS_PROVIDER_TIMEOUT")
+            .ok()
+            .and_then(|value| value.parse::<u64>().ok())
+            .unwrap_or(30);
+        let timeout = Duration::from_secs(timeout);
+        let mut client = Client::new();
+        client.set_base_url(base_url.parse()?);
+        client.set_connect_timeout(timeout);
+        client.set_first_byte_timeout(timeout);
+
+        let max_retries = std::env::var("TTS_PROVIDER_MAX_RETRIES")
+            .ok()
+            .and_then(|n| n.parse::<usize>().ok())
+            .unwrap_or(3);
+
+        let retry_config = RetryConfig::new()
+            .with_max_attempts(max_retries)
+            .with_min_delay(Duration::from_millis(500))
+            .with_max_delay(Duration::from_secs(10));
+
+        Ok(Self {
+            client,
+            retry: Retry::new(retry_config, WasiAsyncRuntime::new()),
+        })
     }
 
     fn should_retry_wstd_result(
