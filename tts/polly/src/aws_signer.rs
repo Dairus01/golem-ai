@@ -69,6 +69,7 @@ const URI_ENCODE_SET: &AsciiSet = &CONTROLS
 
 const QUERY_ENCODE_SET: &AsciiSet = &URI_ENCODE_SET.add(b'=').add(b'&').add(b'+');
 
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct AwsSignatureV4 {
     access_key: String,

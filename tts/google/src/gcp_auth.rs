@@ -11,6 +11,7 @@ use rsa::{pkcs8::DecodePrivateKey, RsaPrivateKey};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
+#[allow(dead_code)]
 #[derive(Debug, Deserialize, Clone)]
 pub struct ServiceAccountKey {
     #[serde(rename = "type")]
@@ -43,6 +44,7 @@ impl ServiceAccountKey {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub enum Error {
     JsonError(serde_json::Error),
@@ -74,6 +76,7 @@ struct JwtClaim {
     iat: i64,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 struct TokenResponse {
     access_token: String,
@@ -81,6 +84,7 @@ struct TokenResponse {
     token_type: String,
 }
 
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct GcpAuth<HC: HttpClient> {
     pub(crate) http_client: HC,
@@ -112,6 +116,7 @@ impl<HC: HttpClient> GcpAuth<HC> {
         })
     }
 
+    #[allow(dead_code)]
     pub fn project_id(&self) -> &str {
         &self.project_id
     }

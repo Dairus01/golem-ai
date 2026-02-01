@@ -256,6 +256,7 @@ impl golem_tts::guest::VoiceConversionStreamGuest for DeepgramStream {
     fn close(&self) {}
 }
 
+#[allow(dead_code)]
 #[derive(Clone)]
 struct DeepgramTtsApi<HC: HttpClient> {
     api_key: String,
