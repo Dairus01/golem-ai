@@ -100,9 +100,6 @@ impl WstdHttpClient {
         }
     }
 
-    pub fn new_with_endpoint(_base_url: &str) -> Self {
-        Self::new()
-    }
 
     fn should_retry_wstd_result(
         result: &Result<wstd::http::Response<wstd::http::body::IncomingBody>, wstd::http::Error>,

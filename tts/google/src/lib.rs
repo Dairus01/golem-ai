@@ -63,12 +63,7 @@ impl GoogleTtsComponent {
                 gcp_auth::ServiceAccountKey::new(project_id, client_email, private_key)
             };
 
-            let http_client = if let Ok(endpoint) = std::env::var("TTS_PROVIDER_ENDPOINT") {
-                WstdHttpClient::new_with_endpoint(&endpoint)
-            } else {
-                WstdHttpClient::new()
-            };
-            let api_client = GoogleTtsApi::new(service_acc_key, http_client)?;
+            let api_client = GoogleTtsApi::new(service_acc_key, WstdHttpClient::new())?;
             Ok(api_client)
         })
     }
