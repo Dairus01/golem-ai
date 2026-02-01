@@ -42,6 +42,7 @@ impl Guest for Component {
                 similarity: None,
                 style: None,
             }),
+            audio_effects: None,
             enable_timing: None,
             enable_word_timing: None,
             seed: None,

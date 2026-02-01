@@ -27,7 +27,6 @@ impl DeepgramComponent {
             let api_version = std::env::var("DEEPGRAM_API_VERSION").ok();
             let http_client = if let Ok(endpoint) = std::env::var("TTS_PROVIDER_ENDPOINT") {
                 WstdHttpClient::new_with_endpoint(&endpoint)
-                    .map_err(|err| golem_tts::error::Error::HttpError(err.to_string()))?
             } else {
                 WstdHttpClient::new()
             };

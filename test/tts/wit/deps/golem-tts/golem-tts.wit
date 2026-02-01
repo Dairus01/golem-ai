@@ -191,7 +191,7 @@ interface voices {
 }
 
 interface synthesis {
-  use types.{text-input, audio-config, voice-settings, synthesis-result, tts-error, timing-info};
+  use types.{text-input, audio-config, voice-settings, synthesis-result, tts-error, timing-info, audio-effects};
 
   record synthesis-options {
     audio-config: option<audio-config>,

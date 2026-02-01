@@ -28,6 +28,8 @@ shared settings and provider-specific requirements.
 
 | Variable | Required | Description |
 | --- | --- | --- |
+| `TTS_PROVIDER_ENDPOINT` | No | Override the provider base URL (when supported by the runtime). |
+| `TTS_PROVIDER_TIMEOUT` | No | Request timeout in seconds (default: `30`). |
 | `TTS_PROVIDER_MAX_RETRIES` | No | Maximum retry attempts for transient failures (default: `3`). |
 | `TTS_PROVIDER_LOG_LEVEL` | No | Logging verbosity (`trace`, `debug`, `info`, `warn`, `error`). |
 
