@@ -274,9 +274,15 @@ impl<HC: HttpClient> DeepgramTtsApi<HC> {
     }
 
     async fn list_voices(&self) -> Result<Vec<VoiceInfo>, golem_tts::error::Error> {
+        let uri = if let Some(api_version) = self.api_version.as_deref() {
+            format!("https://api.deepgram.com/{}/speak/voices", api_version.trim_matches('/'))
+        } else {
+            "https://api.deepgram.com/v1/speak/voices".to_string()
+        };
+
         let request = http::Request::builder()
             .method(http::Method::GET)
-            .uri("https://api.deepgram.com/v1/speak/voices")
+            .uri(uri)
             .header(http::header::AUTHORIZATION, format!("Token {}", self.api_key))
             .body(Bytes::new())
             .map_err(|err| golem_tts::error::Error::Http("voices".to_string(), err.into()))?;
