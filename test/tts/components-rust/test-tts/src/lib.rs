@@ -11,13 +11,13 @@ struct Component;
 impl Guest for Component {
     fn test_list_voices() -> Result<String, String> {
         let voices = list_voices(&None).map_err(|err| format!("error: {err:?}"))?;
-        let batch = voices.get_next().map_err(|err| format!("error: {err:?}"))?;
+        let batch = voices;
         Ok(format!("{batch:?}"))
     }
 
     fn test_synthesize() -> Result<String, String> {
         let voices = list_voices(&None).map_err(|err| format!("error: {err:?}"))?;
-        let batch = voices.get_next().map_err(|err| format!("error: {err:?}"))?;
+        let batch = voices;
         let first_voice = batch
             .first()
             .ok_or_else(|| "no voices returned".to_string())?;
