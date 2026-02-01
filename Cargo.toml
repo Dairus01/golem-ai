@@ -51,7 +51,6 @@ members = [
     "tts/polly",
     "tts/google",
     "tts/deepgram",
-    "test/tts",
 ]
 
 [profile.release]
