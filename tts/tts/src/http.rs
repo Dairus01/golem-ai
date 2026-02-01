@@ -186,12 +186,11 @@ impl From<Request<Bytes>> for WasiRequest<BytesCursor> {
 
 impl HttpClient for WstdHttpClient {
     async fn execute(&self, request: Request<Bytes>) -> Result<Response<Vec<u8>>, Error> {
-        let wasi_request = WasiRequest::from(request).0;
-
         let wasi_response = self
             .retry
             .retry_when(Self::should_retry_wstd_result, || async {
-                self.client.send(wasi_request.clone()).await
+                let wasi_request = WasiRequest::from(request.clone()).0;
+                self.client.send(wasi_request).await
             })
             .await?;
 
