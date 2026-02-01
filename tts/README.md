@@ -21,28 +21,106 @@ Every component exports the same `golem:tts` interface, [defined here](tts/wit/g
 
 ## Environment Variables
 
-Common configuration:
-- `TTS_PROVIDER_ENDPOINT` - Custom endpoint URL override
-- `TTS_PROVIDER_TIMEOUT` - Request timeout in seconds (default: 30)
-- `TTS_PROVIDER_MAX_RETRIES` - Maximum retry attempts (default: 3)
-- `TTS_PROVIDER_LOG_LEVEL` - Logging verbosity (debug, info, warn, error)
+The TTS components read configuration from environment variables. The table below summarizes the
+shared settings and provider-specific requirements.
 
-Provider-specific:
-- **ElevenLabs**: `ELEVENLABS_API_KEY`, `ELEVENLABS_MODEL_VERSION`
-- **AWS Polly**: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `AWS_SESSION_TOKEN`
-- **Google Cloud**: `GOOGLE_APPLICATION_CREDENTIALS`, `GOOGLE_CLOUD_PROJECT`, or (`GOOGLE_CLIENT_EMAIL`, `GOOGLE_PRIVATE_KEY`)
-- **Deepgram**: `DEEPGRAM_API_KEY`, `DEEPGRAM_API_VERSION`
+### Common configuration
 
-## Examples
+| Variable | Required | Description |
+| --- | --- | --- |
+| `TTS_PROVIDER_ENDPOINT` | No | Override the provider base URL (useful for proxies or mocks). |
+| `TTS_PROVIDER_TIMEOUT` | No | Request timeout in seconds (default: `30`). |
+| `TTS_PROVIDER_MAX_RETRIES` | No | Maximum retry attempts for transient failures (default: `3`). |
+| `TTS_PROVIDER_LOG_LEVEL` | No | Logging verbosity (`trace`, `debug`, `info`, `warn`, `error`). |
 
-See the [test application](../test/tts/components-rust/test-tts/src/lib.rs) for basic usage.
+### ElevenLabs
 
-### Running the examples
+| Variable | Required | Description |
+| --- | --- | --- |
+| `ELEVENLABS_API_KEY` | Yes | API key for ElevenLabs. |
+| `ELEVENLABS_MODEL_VERSION` | No | Optional model version (falls back to provider default). |
 
-Start a Golem instance, then:
+### AWS Polly
+
+| Variable | Required | Description |
+| --- | --- | --- |
+| `AWS_REGION` | Yes | AWS region (for example `us-east-1`). |
+| `AWS_ACCESS_KEY_ID` | Yes | AWS access key ID. |
+| `AWS_SECRET_ACCESS_KEY` | Yes | AWS secret access key. |
+| `AWS_SESSION_TOKEN` | No | AWS session token (required for temporary credentials). |
+
+### Google Cloud Text-to-Speech
+
+| Variable | Required | Description |
+| --- | --- | --- |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Yes* | Path to a service account JSON file. |
+| `GOOGLE_CLOUD_PROJECT` | Yes* | Project ID when using inline credentials. |
+| `GOOGLE_CLIENT_EMAIL` | Yes* | Client email when using inline credentials. |
+| `GOOGLE_PRIVATE_KEY` | Yes* | Private key when using inline credentials. |
+
+`*` Either `GOOGLE_APPLICATION_CREDENTIALS` **or** the inline credential trio is required.
+
+### Deepgram Aura
+
+| Variable | Required | Description |
+| --- | --- | --- |
+| `DEEPGRAM_API_KEY` | Yes | Deepgram API key. |
+| `DEEPGRAM_API_VERSION` | No | Optional API version override. |
+
+## Example Usage
+
+The [test application](../test/tts/components-rust/test-tts/src/lib.rs) demonstrates the exported
+functions and provider presets. Use it to validate your credentials or build pipeline.
+
+### Running the test application
+
+1. Start a Golem instance.
+2. Build and deploy the test component for the desired provider:
 
 ```bash
 cd ../test/tts
 golem build --preset elevenlabs-debug
 golem deploy --preset elevenlabs-debug
+```
+
+3. Start a worker with the required provider environment variables:
+
+```bash
+golem worker new test:tts/debug \
+  --env ELEVENLABS_API_KEY=your_key_here \
+  --env TTS_PROVIDER_LOG_LEVEL=info
+```
+
+4. Invoke the test entrypoint:
+
+```bash
+golem worker invoke test:tts/debug synthesize
+```
+
+### Provider presets
+
+The test manifest includes the following preset names:
+
+- `elevenlabs-debug` / `elevenlabs-release`
+- `polly-debug` / `polly-release`
+- `google-debug` / `google-release`
+- `deepgram-debug` / `deepgram-release`
+
+Use the preset that matches the provider you want to validate.
+
+### WIT interface reference
+
+The TTS interface is defined in [`tts/tts/wit/golem-tts.wit`](tts/tts/wit/golem-tts.wit). The
+following example illustrates the core synthesis flow:
+
+```wit
+use types.{text-input, tts-error, synthesis-result};
+
+interface synthesis {
+  synthesize: func(
+    input: text-input,
+    voice-id: string,
+    options: option<synthesis-options>
+  ) -> result<synthesis-result, tts-error>;
+}
 ```
