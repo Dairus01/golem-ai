@@ -139,7 +139,7 @@ interface types {
 }
 
 interface voices {
-  use types.{tts-error, language-code, voice-gender, voice-quality, audio-format, voice-settings};
+  use types.{tts-error, language-code, voice-gender, voice-quality, audio-format, voice-settings, synthesis-result};
 
   record voice-filter {
     language: option<language-code>,
@@ -178,38 +178,24 @@ interface voices {
     supports-ssml: func() -> bool;
     get-sample-rates: func() -> list<u32>;
     get-supported-formats: func() -> list<audio-format>;
-    update-settings: func(settings: voice-settings) -> result<(), tts-error>;
-    delete: func() -> result<(), tts-error>;
+    update-settings: func(settings: voice-settings) -> result<_, tts-error>;
+    delete: func() -> result<_, tts-error>;
     clone: func() -> result<string, tts-error>;
-    preview: func(text: string) -> result<types.synthesis-result, tts-error>;
+    preview: func(text: string) -> result<synthesis-result, tts-error>;
   }
 
-  resource voice-results {
-    has-more: func() -> bool;
-    get-next: func() -> result<list<voice-info>, tts-error>;
-    get-total-count: func() -> option<u32>;
-  }
-
-  list-voices: func(filter: option<voice-filter>) -> result<voice-results, tts-error>;
-  get-voice: func(voice-id: string) -> result<voice, tts-error>;
-  search-voices: func(query: string, filter: option<voice-filter>) -> result<voice-results, tts-error>;
-  list-languages: func() -> result<list<language-info>, tts-error>;
-
-  record language-info {
-    code: language-code,
-    name: string,
-    native-name: string,
-    voice-count: u32,
-  }
+  list-voices: func(filter: option<voice-filter>) -> result<list<voice-info>, tts-error>;
+  get-voice: func(voice-id: string) -> result<voice-info, tts-error>;
+  search-voices: func(query: string, filter: option<voice-filter>) -> result<list<voice-info>, tts-error>;
+  list-languages: func() -> result<list<string>, tts-error>;
 }
 
 interface synthesis {
-  use types.{text-input, audio-config, voice-settings, audio-effects, synthesis-result, tts-error, timing-info};
+  use types.{text-input, audio-config, voice-settings, synthesis-result, tts-error, timing-info};
 
   record synthesis-options {
     audio-config: option<audio-config>,
     voice-settings: option<voice-settings>,
-    audio-effects: option<audio-effects>,
     enable-timing: option<bool>,
     enable-word-timing: option<bool>,
     seed: option<u64>,
@@ -235,24 +221,24 @@ interface synthesis {
 
   synthesize: func(
     input: text-input,
-    voice: borrow<voices.voice>,
+    voice-id: string,
     options: option<synthesis-options>
   ) -> result<synthesis-result, tts-error>;
 
   synthesize-batch: func(
     inputs: list<text-input>,
-    voice: borrow<voices.voice>,
+    voice-id: string,
     options: option<synthesis-options>
   ) -> result<list<synthesis-result>, tts-error>;
 
   get-timing-marks: func(
     input: text-input,
-    voice: borrow<voices.voice>
+    voice-id: string
   ) -> result<list<timing-info>, tts-error>;
 
   validate-input: func(
     input: text-input,
-    voice: borrow<voices.voice>
+    voice-id: string
   ) -> result<validation-result, tts-error>;
 }
 
@@ -260,44 +246,14 @@ interface streaming {
   use types.{text-input, audio-chunk, tts-error};
   use synthesis.{synthesis-options};
 
-  resource synthesis-stream {
-    send-text: func(input: text-input) -> result<(), tts-error>;
-    finish: func() -> result<(), tts-error>;
-    receive-chunk: func() -> result<option<audio-chunk>, tts-error>;
-    has-pending-audio: func() -> bool;
-    get-status: func() -> stream-status;
-    close: func();
-  }
-
-  enum stream-status {
-    ready,
-    processing,
-    finished,
-    error,
-    closed,
-  }
-
   create-stream: func(
-    voice: borrow<voices.voice>,
+    voice-id: string,
     options: option<synthesis-options>
-  ) -> result<synthesis-stream, tts-error>;
-
-  create-voice-conversion-stream: func(
-    target-voice: borrow<voices.voice>,
-    options: option<synthesis-options>
-  ) -> result<voice-conversion-stream, tts-error>;
-
-  resource voice-conversion-stream {
-    send-audio: func(audio-data: list<u8>) -> result<(), tts-error>;
-    receive-converted: func() -> result<option<audio-chunk>, tts-error>;
-    finish: func() -> result<(), tts-error>;
-    close: func();
-  }
+  ) -> result<list<audio-chunk>, tts-error>;
 }
 
 interface advanced {
-  use types.{tts-error, audio-config};
-  use voices.{voice};
+  use types.{tts-error, audio-config, voice-gender, synthesis-metadata, synthesis-result, language-code};
 
   record audio-sample {
     data: list<u8>,
@@ -312,7 +268,7 @@ interface advanced {
   ) -> result<string, tts-error>;
 
   record voice-design-params {
-    gender: types.voice-gender,
+    gender: voice-gender,
     age-category: age-category,
     accent: string,
     personality-traits: list<string>,
@@ -333,40 +289,19 @@ interface advanced {
 
   convert-voice: func(
     input-audio: list<u8>,
-    target-voice: borrow<voice>,
+    target-voice-id: string,
     preserve-timing: option<bool>
-  ) -> result<types.synthesis-result, tts-error>;
+  ) -> result<synthesis-result, tts-error>;
 
   generate-sound-effect: func(
     description: string,
     duration-seconds: option<f32>,
     style-influence: option<f32>
-  ) -> result<types.synthesis-result, tts-error>;
-
-  record pronunciation-entry {
-    word: string,
-    pronunciation: string,
-    part-of-speech: option<string>,
-  }
-
-  resource pronunciation-lexicon {
-    get-name: func() -> string;
-    get-language: func() -> types.language-code;
-    get-entry-count: func() -> u32;
-    add-entry: func(word: string, pronunciation: string) -> result<(), tts-error>;
-    remove-entry: func(word: string) -> result<(), tts-error>;
-    export-content: func() -> result<string, tts-error>;
-  }
-
-  create-lexicon: func(
-    name: string,
-    language: types.language-code,
-    entries: option<list<pronunciation-entry>>
-  ) -> result<pronunciation-lexicon, tts-error>;
+  ) -> result<synthesis-result, tts-error>;
 
   synthesize-long-form: func(
     content: string,
-    voice: borrow<voice>,
+    voice-id: string,
     output-location: string,
     chapter-breaks: option<list<u32>>
   ) -> result<long-form-result, tts-error>;
@@ -375,7 +310,7 @@ interface advanced {
     output-location: string,
     total-duration: f32,
     chapter-durations: option<list<f32>>,
-    metadata: types.synthesis-metadata,
+    metadata: synthesis-metadata,
   }
 }
 

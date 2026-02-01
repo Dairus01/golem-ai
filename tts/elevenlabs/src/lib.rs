@@ -1,9 +1,7 @@
 use bytes::Bytes;
 use golem_tts::durability::{DurableTts, ExtendedGuest};
 use golem_tts::golem::tts::advanced::{AudioSample, LongFormResult, VoiceDesignParams};
-use golem_tts::golem::tts::streaming::{
-    GuestSynthesisStream, GuestVoiceConversionStream, StreamStatus, SynthesisOptions,
-};
+use golem_tts::golem::tts::streaming::SynthesisOptions;
 use golem_tts::golem::tts::synthesis::{SynthesisOptions as WitSynthesisOptions, ValidationResult};
 use golem_tts::golem::tts::types::{
     AudioChunk, SynthesisMetadata, SynthesisResult, TextInput, TimingInfo, TtsError, VoiceSettings,
@@ -210,7 +208,7 @@ impl ElevenLabsStream {
     }
 }
 
-impl GuestSynthesisStream for ElevenLabsStream {
+impl golem_tts::guest::TtsStreamGuest for ElevenLabsStream {
     fn send_text(&self, input: TextInput) -> Result<(), TtsError> {
         let result = ElevenLabsComponent::synthesize(SynthesisRequest {
             input,
@@ -240,18 +238,10 @@ impl GuestSynthesisStream for ElevenLabsStream {
         !self.buffer.borrow().is_empty()
     }
 
-    fn get_status(&self) -> StreamStatus {
-        if *self.finished.borrow() {
-            StreamStatus::Finished
-        } else {
-            StreamStatus::Processing
-        }
-    }
-
     fn close(&self) {}
 }
 
-impl GuestVoiceConversionStream for ElevenLabsStream {
+impl golem_tts::guest::VoiceConversionStreamGuest for ElevenLabsStream {
     fn send_audio(&self, _audio_data: Vec<u8>) -> Result<(), TtsError> {
         Err(TtsError::UnsupportedOperation(
             "Voice conversion unsupported".to_string(),

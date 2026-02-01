@@ -6,8 +6,9 @@ use crate::exports::golem::tts::streaming::SynthesisOptions as WitSynthesisOptio
 use crate::exports::golem::tts::types::{
     AudioChunk as WitAudioChunk, AudioConfig as WitAudioConfig, SynthesisResult as WitSynthesisResult,
     TextInput as WitTextInput, TimingInfo as WitTimingInfo, TtsError as WitTtsError,
-    ValidationResult as WitValidationResult, VoiceSettings as WitVoiceSettings,
+    VoiceSettings as WitVoiceSettings,
 };
+use crate::exports::golem::tts::synthesis::ValidationResult as WitValidationResult;
 use crate::exports::golem::tts::voices::{VoiceFilter as WitVoiceFilter, VoiceInfo as WitVoiceInfo};
 
 pub struct SynthesisRequest {
@@ -89,7 +90,6 @@ pub trait TtsStreamGuest {
     fn finish(&self) -> Result<(), WitTtsError>;
     fn receive_chunk(&self) -> Result<Option<WitAudioChunk>, WitTtsError>;
     fn has_pending_audio(&self) -> bool;
-    fn get_status(&self) -> crate::exports::golem::tts::streaming::StreamStatus;
     fn close(&self);
 }
 

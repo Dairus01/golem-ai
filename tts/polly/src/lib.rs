@@ -2,9 +2,7 @@ use bytes::Bytes;
 use chrono::Utc;
 use golem_tts::durability::{DurableTts, ExtendedGuest};
 use golem_tts::golem::tts::advanced::{AudioSample, LongFormResult, VoiceDesignParams};
-use golem_tts::golem::tts::streaming::{
-    GuestSynthesisStream, GuestVoiceConversionStream, StreamStatus, SynthesisOptions,
-};
+use golem_tts::golem::tts::streaming::SynthesisOptions;
 use golem_tts::golem::tts::synthesis::{SynthesisOptions as WitSynthesisOptions, ValidationResult};
 use golem_tts::golem::tts::types::{
     AudioChunk, AudioFormat, SynthesisMetadata, SynthesisResult, TextInput, TimingInfo, TtsError,
@@ -214,7 +212,7 @@ impl PollyStream {
     }
 }
 
-impl GuestSynthesisStream for PollyStream {
+impl golem_tts::guest::TtsStreamGuest for PollyStream {
     fn send_text(&self, input: TextInput) -> Result<(), TtsError> {
         let result = PollyComponent::synthesize(SynthesisRequest {
             input,
@@ -244,18 +242,10 @@ impl GuestSynthesisStream for PollyStream {
         !self.buffer.borrow().is_empty()
     }
 
-    fn get_status(&self) -> StreamStatus {
-        if *self.finished.borrow() {
-            StreamStatus::Finished
-        } else {
-            StreamStatus::Processing
-        }
-    }
-
     fn close(&self) {}
 }
 
-impl GuestVoiceConversionStream for PollyStream {
+impl golem_tts::guest::VoiceConversionStreamGuest for PollyStream {
     fn send_audio(&self, _audio_data: Vec<u8>) -> Result<(), TtsError> {
         Err(TtsError::UnsupportedOperation(
             "Voice conversion unsupported".to_string(),

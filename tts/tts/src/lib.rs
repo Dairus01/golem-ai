@@ -7,7 +7,7 @@ pub mod runtime;
 pub mod voices;
 
 wit_bindgen::generate!({
-    path: "../wit",
+    path: "wit",
     world: "tts-library",
     generate_all,
     generate_unused_types: true,

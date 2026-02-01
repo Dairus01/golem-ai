@@ -1,9 +1,7 @@
 use bytes::Bytes;
 use golem_tts::durability::{DurableTts, ExtendedGuest};
 use golem_tts::golem::tts::advanced::{AudioSample, LongFormResult, VoiceDesignParams};
-use golem_tts::golem::tts::streaming::{
-    GuestSynthesisStream, GuestVoiceConversionStream, StreamStatus, SynthesisOptions,
-};
+use golem_tts::golem::tts::streaming::SynthesisOptions;
 use golem_tts::golem::tts::synthesis::{SynthesisOptions as WitSynthesisOptions, ValidationResult};
 use golem_tts::golem::tts::types::{
     AudioChunk, SynthesisMetadata, SynthesisResult, TextInput, TimingInfo, TtsError,
@@ -207,7 +205,7 @@ impl DeepgramStream {
     }
 }
 
-impl GuestSynthesisStream for DeepgramStream {
+impl golem_tts::guest::TtsStreamGuest for DeepgramStream {
     fn send_text(&self, input: TextInput) -> Result<(), TtsError> {
         let result = DeepgramComponent::synthesize(SynthesisRequest {
             input,
@@ -237,18 +235,10 @@ impl GuestSynthesisStream for DeepgramStream {
         !self.buffer.borrow().is_empty()
     }
 
-    fn get_status(&self) -> StreamStatus {
-        if *self.finished.borrow() {
-            StreamStatus::Finished
-        } else {
-            StreamStatus::Processing
-        }
-    }
-
     fn close(&self) {}
 }
 
-impl GuestVoiceConversionStream for DeepgramStream {
+impl golem_tts::guest::VoiceConversionStreamGuest for DeepgramStream {
     fn send_audio(&self, _audio_data: Vec<u8>) -> Result<(), TtsError> {
         Err(TtsError::UnsupportedOperation(
             "Voice conversion unsupported".to_string(),
