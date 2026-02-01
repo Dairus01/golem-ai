@@ -90,10 +90,12 @@ pub trait TtsStreamGuest {
     fn receive_chunk(&self) -> Result<Option<WitAudioChunk>, WitTtsError>;
     fn has_pending_audio(&self) -> bool;
     fn get_status(&self) -> crate::exports::golem::tts::streaming::StreamStatus;
+    fn close(&self);
 }
 
 pub trait VoiceConversionStreamGuest {
     fn send_audio(&self, audio_data: Vec<u8>) -> Result<(), WitTtsError>;
     fn receive_converted(&self) -> Result<Option<WitAudioChunk>, WitTtsError>;
     fn finish(&self) -> Result<(), WitTtsError>;
+    fn close(&self);
 }
