@@ -4,9 +4,8 @@ use crate::exports::golem::tts::advanced::{
 };
 use crate::exports::golem::tts::streaming::SynthesisOptions as WitSynthesisOptions;
 use crate::exports::golem::tts::types::{
-    AudioChunk as WitAudioChunk, AudioConfig as WitAudioConfig, SynthesisResult as WitSynthesisResult,
-    TextInput as WitTextInput, TimingInfo as WitTimingInfo, TtsError as WitTtsError,
-    VoiceSettings as WitVoiceSettings,
+    AudioChunk as WitAudioChunk, SynthesisResult as WitSynthesisResult, TextInput as WitTextInput,
+    TimingInfo as WitTimingInfo, TtsError as WitTtsError,
 };
 use crate::exports::golem::tts::synthesis::ValidationResult as WitValidationResult;
 use crate::exports::golem::tts::voices::{VoiceFilter as WitVoiceFilter, VoiceInfo as WitVoiceInfo};

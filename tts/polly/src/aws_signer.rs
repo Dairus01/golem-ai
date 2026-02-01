@@ -69,6 +69,7 @@ const URI_ENCODE_SET: &AsciiSet = &CONTROLS
 
 const QUERY_ENCODE_SET: &AsciiSet = &URI_ENCODE_SET.add(b'=').add(b'&').add(b'+');
 
+#[derive(Clone)]
 pub struct AwsSignatureV4 {
     access_key: String,
     secret_key: String,
@@ -149,7 +150,7 @@ impl AwsSignatureV4 {
 
         let credential = format!(
             "{}/{}/{}/aws4_request",
-            self.access_key, date_stamp, self.region, self.service
+            date_stamp, self.region, self.service
         );
 
         let auth_header = format!(

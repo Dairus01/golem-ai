@@ -47,6 +47,12 @@ pub struct WstdHttpClient {
     retry: Retry<WasiAsyncRuntime>,
 }
 
+impl Clone for WstdHttpClient {
+    fn clone(&self) -> Self {
+        Self::new()
+    }
+}
+
 impl WstdHttpClient {
     pub fn new() -> Self {
         let max_retries = std::env::var("TTS_PROVIDER_MAX_RETRIES")

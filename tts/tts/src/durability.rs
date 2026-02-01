@@ -1,4 +1,4 @@
-use std::{cell::RefCell, marker::PhantomData};
+use std::marker::PhantomData;
 
 use crate::golem::tts::advanced::{AudioSample, LongFormResult, VoiceDesignParams};
 use crate::golem::tts::streaming::{Guest as StreamingGuest, SynthesisOptions};
@@ -165,8 +165,6 @@ mod durable_impl {
     use golem_rust::bindings::golem::durability::durability::DurableFunctionType;
     use golem_rust::durability::Durability;
     use golem_rust::{with_persistence_level, FromValueAndType, IntoValue, PersistenceLevel};
-    use std::cell::RefCell;
-
     #[derive(Debug, Clone, PartialEq, IntoValue, FromValueAndType)]
     struct VoicesInput {
         filter: Option<VoiceFilter>,

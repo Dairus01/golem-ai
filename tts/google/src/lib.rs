@@ -1,13 +1,13 @@
 use bytes::Bytes;
 use golem_tts::durability::{DurableTts, ExtendedGuest};
 use golem_tts::golem::tts::advanced::{AudioSample, LongFormResult, VoiceDesignParams};
-use golem_tts::golem::tts::streaming::SynthesisOptions;
+// use golem_tts::golem::tts::streaming::SynthesisOptions;
 use golem_tts::golem::tts::synthesis::{SynthesisOptions as WitSynthesisOptions, ValidationResult};
 use golem_tts::golem::tts::types::{
     AudioChunk, AudioFormat, SynthesisMetadata, SynthesisResult, TextInput, TimingInfo, TtsError,
 };
 use golem_tts::golem::tts::voices::{VoiceFilter, VoiceGender, VoiceInfo, VoiceQuality};
-use golem_tts::guest::{StreamRequest, SynthesisRequest, TtsGuest, TtsStreamGuest};
+use golem_tts::guest::{StreamRequest, SynthesisRequest, TtsGuest};
 use golem_tts::http::{HttpClient, WstdHttpClient};
 use golem_rust::Uuid;
 use base64::Engine;
@@ -63,7 +63,7 @@ impl GoogleTtsComponent {
                 gcp_auth::ServiceAccountKey::new(project_id, client_email, private_key)
             };
 
-            let api_client = GoogleTtsApi::new(service_acc_key, WstdHttpClient::new())?;
+        let api_client = GoogleTtsApi::new(service_acc_key, WstdHttpClient::new())?;
             Ok(api_client)
         })
     }
@@ -296,7 +296,7 @@ impl golem_tts::guest::VoiceConversionStreamGuest for GoogleTtsStream {
 }
 
 #[derive(Clone)]
-struct GoogleTtsApi<HC: HttpClient> {
+struct GoogleTtsApi<HC: HttpClient + Clone> {
     auth: gcp_auth::GcpAuth<HC>,
     http_client: HC,
 }

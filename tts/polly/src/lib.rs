@@ -2,7 +2,7 @@ use bytes::Bytes;
 use chrono::Utc;
 use golem_tts::durability::{DurableTts, ExtendedGuest};
 use golem_tts::golem::tts::advanced::{AudioSample, LongFormResult, VoiceDesignParams};
-use golem_tts::golem::tts::streaming::SynthesisOptions;
+// use golem_tts::golem::tts::streaming::SynthesisOptions;
 use golem_tts::golem::tts::synthesis::{SynthesisOptions as WitSynthesisOptions, ValidationResult};
 use golem_tts::golem::tts::types::{
     AudioChunk, AudioFormat, SynthesisMetadata, SynthesisResult, TextInput, TimingInfo, TtsError,
@@ -10,6 +10,7 @@ use golem_tts::golem::tts::types::{
 use golem_tts::golem::tts::voices::{VoiceFilter, VoiceGender, VoiceInfo, VoiceQuality};
 use golem_tts::guest::{StreamRequest, SynthesisRequest, TtsGuest};
 use golem_tts::http::{HttpClient, WstdHttpClient};
+use golem_rust::Uuid;
 use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
@@ -195,7 +196,6 @@ type DurablePollyComponent = DurableTts<PollyComponent>;
 
 golem_tts::export_tts!(DurablePollyComponent with_types_in golem_tts);
 
-#[derive(Clone)]
 struct PollyStream {
     request: StreamRequest,
     buffer: RefCell<Vec<AudioChunk>>,
@@ -383,7 +383,7 @@ impl<HC: HttpClient> PollyApi<HC> {
                 character_count: request_body.text.chars().count() as u32,
                 word_count: request_body.text.split_whitespace().count() as u32,
                 audio_size_bytes: audio.len() as u32,
-                request_id: uuid::Uuid::new_v4().to_string(),
+                request_id: Uuid::new_v4().to_string(),
                 provider_info: Some("aws-polly".to_string()),
             },
         })

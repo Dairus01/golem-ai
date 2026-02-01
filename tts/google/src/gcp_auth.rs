@@ -83,7 +83,7 @@ struct TokenResponse {
 
 #[derive(Clone)]
 pub struct GcpAuth<HC: HttpClient> {
-    http_client: HC,
+    pub(crate) http_client: HC,
     project_id: String,
     client_email: String,
     private_key: RsaPrivateKey,
