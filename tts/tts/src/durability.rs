@@ -502,7 +502,7 @@ mod durable_impl {
         }
     }
 
-impl<Impl: ExtendedGuest> GuestSynthesisStream for DurableSynthesisStream<Impl> {
+    impl<Impl: ExtendedGuest> GuestSynthesisStream for DurableSynthesisStream<Impl> {
         fn send_text(&self, input: TextInput) -> Result<(), TtsError> {
             let durability = Durability::<(), TtsError>::new(
                 "golem_tts",
@@ -589,7 +589,7 @@ impl<Impl: ExtendedGuest> GuestSynthesisStream for DurableSynthesisStream<Impl> 
                 with_persistence_level(PersistenceLevel::PersistNothing, || stream.close());
             }
         }
-}
+    }
 
     pub struct DurableVoiceConversionStream<Impl: ExtendedGuest> {
         inner: RefCell<Impl::VoiceConversionStream>,
