@@ -329,7 +329,12 @@ impl<HC: HttpClient> DeepgramTtsApi<HC> {
             .as_ref()
             .and_then(|opts| opts.model_version.clone())
             .unwrap_or_else(|| voice_id.clone());
-        let uri = format!("https://api.deepgram.com/v1/speak?model={model}");
+        let base_uri = if let Some(api_version) = self.api_version.as_deref() {
+            format!("https://api.deepgram.com/{}/speak", api_version.trim_matches('/'))
+        } else {
+            "https://api.deepgram.com/v1/speak".to_string()
+        };
+        let uri = format!("{base_uri}?model={model}");
         let request_body = DeepgramSynthesisRequest { text: input.content };
         let request_json = serde_json::to_vec(&request_body)
             .map_err(|err| golem_tts::error::Error::Internal(err.to_string()))?;

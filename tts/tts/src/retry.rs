@@ -19,7 +19,7 @@ impl RetryConfig {
     }
 
     pub fn with_max_attempts(mut self, max_attempts: usize) -> Self {
-        self.max_attempts = max_attempts;
+        self.max_attempts = max_attempts.max(1);
         self
     }
 
